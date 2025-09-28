@@ -1123,7 +1123,213 @@ h1 {
   outline: none;
   border-color: rgba(255, 255, 255, 0.4);
 }
-    
+  
+
+/* ===== 📶 QR WIFI READER STYLES ===== */
+.qrwifi-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.upload-container {
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.upload-container.highlight {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-color);
+}
+
+.upload-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.preview-container {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+#preview {
+  max-width: 250px;
+  max-height: 250px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: none;
+}
+
+.loading {
+  text-align: center;
+  margin: 1rem 0;
+  display: none;
+}
+
+.loading-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top: 3px solid var(--accent-color);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.wifi-result {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  border-left: 4px solid var(--accent-color);
+  display: none;
+}
+
+.wifi-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wifi-info:last-child {
+  border-bottom: none;
+}
+
+.wifi-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.wifi-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  word-break: break-all;
+  text-align: right;
+  max-width: 60%;
+}
+
+.raw-data {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  display: none;
+}
+
+.copy-btn {
+  width: 100%;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  margin-top: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.error-container {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: #ef4444;
+  display: none;
+}
+
+.instructions {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.instructions h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.8rem;
+}
+
+.instructions ol {
+  padding-left: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.instructions li {
+  margin-bottom: 0.5rem;
+}
+
+.file-input {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .qrwifi-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .upload-container {
+    padding: 1.5rem;
+  }
+  
+  #preview {
+    max-width: 200px;
+    max-height: 200px;
+  }
+  
+  .wifi-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .wifi-value {
+    max-width: 100%;
+    text-align: left;
+  }
+}  
     /* ===== 🔐 PASSWORD GENERATOR STYLES ===== */
     .tool-container {
       background: rgba(255, 255, 255, 0.1);
