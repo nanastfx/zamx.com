@@ -536,43 +536,6 @@ function adminLogout() {
 }*/
 
 // ===== 🎵 MUSIC PLAYER =====
-let currentAudio = null;
-let isPlaying = false;
-let currentTrackIndex = 0;
-let isRandom = false;
-
-// Default playlist - GANTI dengan URL audio kamu!
-const defaultPlaylist = [
-  {
-    title: "Lofi Study Beat",
-    artist: "Chillhop Music",
-    url: "https://example.com/audio1.mp3", // GANTI dengan URL asli
-    cover: "🎵",
-    duration: "3:45"
-  },
-  {
-    title: "Relaxing Piano",
-    artist: "Ambient Sounds", 
-    url: "https://example.com/audio2.mp3", // GANTI dengan URL asli
-    cover: "🎹",
-    duration: "4:20"
-  },
-  {
-    title: "Jazz Vibes",
-    artist: "Smooth Jazz",
-    url: "https://example.com/audio3.mp3", // GANTI dengan URL asli
-    cover: "🎷",
-    duration: "5:15"
-  },
-  {
-    title: "Electronic Dream",
-    artist: "Synthwave",
-    url: "https://example.com/audio4.mp3", // GANTI dengan URL asli
-    cover: "🎛️",
-    duration: "3:30"
-  }
-];
-
 function showMusicPlayer() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
