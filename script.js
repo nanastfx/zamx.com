@@ -535,6 +535,276 @@ function adminLogout() {
   showAdminLoginForm();
 }*/
 
+// ===== 📶 QR WIFI READER =====
+function showQRWiFiReader() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const qrHTML = `
+    <div class="section-title">
+      <i class="fas fa-wifi"></i>
+      QR WiFi Reader
+    </div>
+
+    <div class="qrwifi-container">
+      <div class="upload-container" id="dropArea">
+        <i class="fas fa-qrcode" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          Drag & drop QR code WiFi atau klik untuk upload
+        </p>
+        <input type="file" id="fileInput" class="file-input" accept="image/*">
+        <button class="upload-btn" id="uploadButton">
+          <i class="fas fa-upload"></i> Upload Gambar
+        </button>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p style="color: var(--text-secondary);">Memproses QR code...</p>
+      </div>
+
+      <div class="preview-container">
+        <img id="preview" src="" alt="Preview QR Code">
+      </div>
+
+      <div class="wifi-result" id="wifiResult">
+        <h4 style="color: var(--text-primary); margin-bottom: 1rem;">
+          <i class="fas fa-network-wired"></i> Informasi WiFi
+        </h4>
+        <div class="wifi-info">
+          <span class="wifi-label">SSID:</span>
+          <span class="wifi-value" id="wifiSsid">-</span>
+        </div>
+        <div class="wifi-info">
+          <span class="wifi-label">Password:</span>
+          <span class="wifi-value" id="wifiPassword">-</span>
+        </div>
+        <div class="wifi-info">
+          <span class="wifi-label">Enkripsi:</span>
+          <span class="wifi-value" id="wifiEncryption">-</span>
+        </div>
+        <div class="wifi-info">
+          <span class="wifi-label">Hidden:</span>
+          <span class="wifi-value" id="wifiHidden">-</span>
+        </div>
+      </div>
+
+      <div class="raw-data" id="rawData"></div>
+      <button class="copy-btn" id="copyButton">
+        <i class="fas fa-copy"></i> Salin Data QR
+      </button>
+
+      <div class="error-container" id="errorContainer">
+        <p id="errorMessage"></p>
+      </div>
+
+      <div class="instructions">
+        <h4><i class="fas fa-info-circle"></i> Cara Menggunakan:</h4>
+        <ol>
+          <li>Upload gambar QR code WiFi</li>
+          <li>Tunggu proses scanning selesai</li>
+          <li>Informasi WiFi akan ditampilkan otomatis</li>
+          <li>Salin password untuk connect ke WiFi</li>
+        </ol>
+      </div>
+    </div>
+
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const qrSection = document.getElementById('qrwifi');
+  qrSection.innerHTML = qrHTML;
+  qrSection.style.display = 'block';
+  
+  // Initialize QR reader functionality
+  initializeQRReader();
+}
+
+function initializeQRReader() {
+  const fileInput = document.getElementById('fileInput');
+  const uploadButton = document.getElementById('uploadButton');
+  const dropArea = document.getElementById('dropArea');
+  const preview = document.getElementById('preview');
+  const loading = document.getElementById('loading');
+  const wifiResult = document.getElementById('wifiResult');
+  const rawData = document.getElementById('rawData');
+  const copyButton = document.getElementById('copyButton');
+  const errorContainer = document.getElementById('errorContainer');
+  const errorMessage = document.getElementById('errorMessage');
+
+  // Upload button click
+  uploadButton.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  // File input change
+  fileInput.addEventListener('change', handleFileSelect);
+
+  // Drag and drop functionality
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+  });
+
+  dropArea.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      fileInput.files = files;
+      handleFileSelect(e);
+    }
+  }
+
+  // Copy button
+  copyButton.addEventListener('click', () => {
+    const text = rawData.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      copyButton.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
+      setTimeout(() => {
+        copyButton.innerHTML = '<i class="fas fa-copy"></i> Salin Data QR';
+      }, 2000);
+    });
+  });
+
+  function handleFileSelect(event) {
+    const file = event.target.files[0] || event.dataTransfer.files[0];
+    if (!file) return;
+
+    if (!file.type.match('image.*')) {
+      showError('Silakan upload file gambar (JPG, PNG, dll).');
+      return;
+    }
+
+    // Reset UI
+    wifiResult.style.display = 'none';
+    rawData.style.display = 'none';
+    copyButton.style.display = 'none';
+    errorContainer.style.display = 'none';
+    loading.style.display = 'block';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      processQRCode(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function processQRCode(imageData) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      
+      // Use jsQR library to decode
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      
+      loading.style.display = 'none';
+
+      if (code) {
+        rawData.textContent = code.data;
+        rawData.style.display = 'block';
+        copyButton.style.display = 'block';
+        parseWifiQRCode(code.data);
+      } else {
+        showError('Tidak dapat membaca QR code. Pastikan gambar jelas dan mengandung QR code WiFi yang valid.');
+      }
+    };
+    img.onerror = function() {
+      loading.style.display = 'none';
+      showError('Gagal memuat gambar. Silakan coba dengan gambar lain.');
+    };
+    img.src = imageData;
+  }
+
+  function parseWifiQRCode(data) {
+    let ssid = '-';
+    let password = '-';
+    let encryption = '-';
+    let hidden = 'Tidak';
+
+    // Standard WiFi QR code format
+    const wifiRegex = /^WIFI:T:([^;]+);S:([^;]+);P:([^;]+);(?:H:([^;]+);)?/;
+    const match = data.match(wifiRegex);
+
+    if (match) {
+      encryption = decodeURIComponent(match[1]);
+      ssid = decodeURIComponent(match[2]);
+      password = decodeURIComponent(match[3]);
+      hidden = match[4] ? (match[4].toLowerCase() === 'true' ? 'Ya' : 'Tidak') : 'Tidak';
+    } else {
+      // Alternative format
+      const ssidMatch = data.match(/(?:^|;)S:([^;]+)(?:;|$)/);
+      const pwdMatch = data.match(/(?:^|;)P:([^;]+)(?:;|$)/);
+      const encMatch = data.match(/(?:^|;)T:([^;]+)(?:;|$)/);
+      const hiddenMatch = data.match(/(?:^|;)H:([^;]+)(?:;|$)/);
+      
+      if (ssidMatch) ssid = decodeURIComponent(ssidMatch[1]);
+      if (pwdMatch) password = decodeURIComponent(pwdMatch[1]);
+      if (encMatch) encryption = decodeURIComponent(encMatch[1]);
+      if (hiddenMatch) hidden = hiddenMatch[1].toLowerCase() === 'true' ? 'Ya' : 'Tidak';
+
+      if (!ssidMatch && !pwdMatch && !encMatch) {
+        showError('Format QR code tidak dikenali. Data mentah telah ditampilkan di bawah.');
+        wifiResult.style.display = 'block';
+        return;
+      }
+    }
+
+    // Update UI
+    document.getElementById('wifiSsid').textContent = ssid;
+    document.getElementById('wifiPassword').textContent = password;
+    document.getElementById('wifiEncryption').textContent = encryption;
+    document.getElementById('wifiHidden').textContent = hidden;
+    
+    wifiResult.style.display = 'block';
+    errorContainer.style.display = 'none';
+  }
+
+  function showError(message) {
+    errorMessage.textContent = message;
+    errorContainer.style.display = 'block';
+    wifiResult.style.display = 'none';
+    loading.style.display = 'none';
+  }
+}
+
+// Load jsQR library dynamically
+function loadJSQR() {
+  return new Promise((resolve, reject) => {
+    if (typeof jsQR !== 'undefined') {
+      resolve();
+      return;
+    }
+    
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
 // ===== 🔐 TEXT ENCRYPTION =====
 function showTextEncryption() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
