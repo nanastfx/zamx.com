@@ -1805,7 +1805,7 @@ ${requestData.message}
 }
 
 // ===== 🔐 ADMIN PANEL =====
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_PASSWORD = "y3GIkpUYmYOyEbvfcSEMr1Q3OzJ2Dv1KPjo6";
 
 function showAdminPanel() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
