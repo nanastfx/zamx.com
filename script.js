@@ -219,6 +219,283 @@ function copyNIKResult() {
   });
     }
 
+// ===== 📱 IPHONE QUOTED GENERATOR =====
+function showIphoneGenerator() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const iphoneHTML = `
+    <div class="section-title">
+      <i class="fas fa-mobile-alt"></i>
+      iPhone Chat Generator
+    </div>
+    
+    <div class="iphone-container">
+      <div class="iphone-input-group">
+        <label class="iphone-label">Time (e.g., 18:00)</label>
+        <input type="text" id="iqcTime" placeholder="Enter time (e.g., 18:00)" class="iphone-input" value="18:00">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Battery Percentage</label>
+        <input type="number" id="iqcBattery" placeholder="Enter battery percentage (1-100)" class="iphone-input" min="1" max="100" value="85">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Carrier Name</label>
+        <input type="text" id="iqcCarrier" placeholder="Enter carrier (e.g., Indosat)" class="iphone-input" value="Indosat">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Message Text</label>
+        <textarea id="iqcMessage" placeholder="Enter your message..." rows="3" class="iphone-textarea">Hello, this is a test message from iPhone Chat Generator!</textarea>
+      </div>
+      
+      <button onclick="generateIphoneChat()" class="btn-primary" id="iqcGenerateBtn" style="width: 100%;">
+        <i class="fas fa-bolt"></i> Generate iPhone Chat
+      </button>
+      
+      <div class="iphone-info" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+          <i class="fas fa-info-circle"></i> This feature generates realistic iPhone chat screenshots with custom messages.
+        </p>
+      </div>
+      
+      <div id="iqcResult" class="iphone-result"></div>
+    </div>
+    
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const iphoneSection = document.getElementById('iphonegenerator');
+  iphoneSection.innerHTML = iphoneHTML;
+  iphoneSection.style.display = 'block';
+}
+
+async function generateIphoneChat() {
+  const time = document.getElementById('iqcTime').value.trim();
+  const battery = document.getElementById('iqcBattery').value.trim();
+  const carrier = document.getElementById('iqcCarrier').value.trim();
+  const msg = document.getElementById('iqcMessage').value.trim();
+  const resultBox = document.getElementById('iqcResult');
+  const btn = document.getElementById('iqcGenerateBtn');
+  
+  resultBox.innerHTML = "";
+
+  // Validation
+  if (!time || !battery || !carrier || !msg) {
+    showNotification('<i class="fas fa-exclamation-triangle"></i> Please fill all fields');
+    return;
+  }
+
+  // Time format validation
+  if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+    showNotification('<i class="fas fa-exclamation-triangle"></i> Please enter valid time format (HH:MM)');
+    return;
+  }
+
+  // Battery validation
+  const batteryNum = parseInt(battery);
+  if (isNaN(batteryNum) || batteryNum < 1 || batteryNum > 100) {
+    showNotification('<i class="fas fa-exclamation-triangle"></i> Battery must be between 1-100');
+    return;
+  }
+
+  // Disable button and show loading
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+  }
+
+  resultBox.innerHTML = `
+    <div class="iphone-status">
+      <i class="fas fa-spinner fa-spin"></i> Starting generation process...
+    </div>
+  `;
+
+  // Prepare API parameters
+  const params = new URLSearchParams();
+  params.append('time', time);
+  params.append('batteryPercentage', battery);
+  params.append('carrierName', carrier);
+  params.append('messageText', msg);
+  params.append('emojiStyle', 'apple');
+  
+  const originalUrl = `https://brat.siputzx.my.id/iphone-quoted?${params.toString()}`;
+
+  console.log('API URL:', originalUrl);
+
+  async function tryFetch(url, attempt = 1, maxAttempts = 3) {
+    try {
+      resultBox.innerHTML = `<div class="iphone-status">Attempt ${attempt}/${maxAttempts} - Processing...</div>`;
+      
+      const response = await fetch(url, { 
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      
+      // Check if blob is valid image
+      if (blob.size === 0) {
+        throw new Error('Empty response from server');
+      }
+      
+      return blob;
+      
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error);
+      
+      if (attempt < maxAttempts) {
+        resultBox.innerHTML += `<div class="iphone-status">Retrying in ${attempt} second(s)...</div>`;
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        return tryFetch(url, attempt + 1, maxAttempts);
+      }
+      
+      throw error;
+    }
+  }
+
+  let blob = null;
+  let errorMessage = '';
+
+  try {
+    // Try direct fetch first
+    blob = await tryFetch(originalUrl, 1, 3);
+    
+  } catch (directError) {
+    console.warn('Direct fetch failed, trying CORS proxy...');
+    
+    try {
+      // Try with CORS proxy
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(originalUrl)}`;
+      blob = await tryFetch(proxyUrl, 1, 2);
+      
+    } catch (proxyError) {
+      console.error('All fetch attempts failed:', proxyError);
+      errorMessage = proxyError.message;
+    }
+  }
+
+  // Re-enable button
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-bolt"></i> Generate iPhone Chat';
+  }
+
+  if (!blob) {
+    const fallbackHTML = `
+      <div class="nik-error" style="text-align: center; padding: 2rem;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3>Generation Failed</h3>
+        <p>Unable to generate image at the moment.</p>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">
+          Error: ${errorMessage || 'Service temporarily unavailable'}
+        </p>
+        <div style="margin-top: 1.5rem;">
+          <button onclick="showFallbackPreview()" class="btn-secondary">
+            <i class="fas fa-eye"></i> Show Preview
+          </button>
+        </div>
+      </div>
+    `;
+    
+    resultBox.innerHTML = fallbackHTML;
+    showNotification('<i class="fas fa-times"></i> Generation failed - Service unavailable');
+    return;
+  }
+
+  try {
+    const imgUrl = URL.createObjectURL(blob);
+    
+    // Create image element to verify it loads
+    const img = new Image();
+    img.onload = function() {
+      resultBox.innerHTML = `
+        <div style="text-align: center;">
+          <h3 style="color: var(--text-primary); margin-bottom: 1rem;">
+            <i class="fas fa-check-circle"></i> Successfully Generated!
+          </h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            Time: ${time} | Battery: ${battery}% | Carrier: ${carrier}
+          </p>
+          <img src="${imgUrl}" class="iphone-image" alt="iPhone chat image" style="max-width: 300px;"/>
+          <div class="iphone-actions">
+            <a href="${imgUrl}" download="iphone_chat_${time.replace(':', '')}_${battery}.png">
+              <button class="btn-primary">
+                <i class="fas fa-download"></i> Download Image
+              </button>
+            </a>
+            <button onclick="window.open('${imgUrl}', '_blank')" class="btn-secondary">
+              <i class="fas fa-external-link-alt"></i> Open in New Tab
+            </button>
+          </div>
+        </div>
+      `;
+      
+      showNotification('<i class="fas fa-check"></i> iPhone chat generated successfully!');
+    };
+    
+    img.onerror = function() {
+      throw new Error('Generated image failed to load');
+    };
+    
+    img.src = imgUrl;
+    
+  } catch (e) {
+    console.error('Failed to display image:', e);
+    resultBox.innerHTML = `
+      <div class="nik-error">
+        <i class="fas fa-exclamation-triangle"></i> Failed to display generated image
+      </div>
+    `;
+    showNotification('<i class="fas fa-times"></i> Failed to display image');
+  }
+}
+
+// Fallback preview function
+function showFallbackPreview() {
+  const resultBox = document.getElementById('iqcResult');
+  const time = document.getElementById('iqcTime').value.trim();
+  const battery = document.getElementById('iqcBattery').value.trim();
+  const carrier = document.getElementById('iqcCarrier').value.trim();
+  const msg = document.getElementById('iqcMessage').value.trim();
+  
+  resultBox.innerHTML = `
+    <div style="text-align: center; padding: 2rem;">
+      <h3 style="color: var(--text-primary); margin-bottom: 1rem;">
+        <i class="fas fa-mobile-alt"></i> Preview (Offline)
+      </h3>
+      <div style="background: #000; color: #fff; padding: 2rem; border-radius: 20px; max-width: 300px; margin: 0 auto; font-family: -apple-system, sans-serif;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+          <span>${time}</span>
+          <span>${battery}%</span>
+        </div>
+        <div style="text-align: center; margin-bottom: 1rem;">
+          <strong>${carrier}</strong>
+        </div>
+        <div style="background: #1c1c1e; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+          ${msg}
+        </div>
+        <div style="color: #8e8e93; font-size: 0.9rem;">
+          This is a preview. Actual image generation service is currently unavailable.
+        </div>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <button onclick="generateIphoneChat()" class="btn-primary">
+          <i class="fas fa-redo"></i> Try Again
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 // ===== 🔐 PASSWORD GENERATOR =====
 function showPasswordGenerator() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
