@@ -220,7 +220,7 @@ function copyNIKResult() {
     }
 
 // ===== 📱 IPHONE QUOTED GENERATOR =====
-function showIphoneGenerator() {
+/*function showIphoneGenerator() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
   const iphoneHTML = `
@@ -494,6 +494,330 @@ function showFallbackPreview() {
       </div>
     </div>
   `;
+}*/
+
+// ===== 📱 IPHONE QUOTED GENERATOR (CLIENT-SIDE) =====
+function showIphoneGenerator() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const iphoneHTML = `
+    <div class="section-title">
+      <i class="fas fa-mobile-alt"></i>
+      iPhone Chat Generator
+    </div>
+    
+    <div class="iphone-container">
+      <div class="iphone-input-group">
+        <label class="iphone-label">Time (e.g., 18:00)</label>
+        <input type="text" id="iqcTime" placeholder="Enter time (e.g., 18:00)" class="iphone-input" value="18:00">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Battery Percentage</label>
+        <input type="number" id="iqcBattery" placeholder="Enter battery percentage (1-100)" class="iphone-input" min="1" max="100" value="85">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Carrier Name</label>
+        <input type="text" id="iqcCarrier" placeholder="Enter carrier (e.g., Indosat)" class="iphone-input" value="Indosat">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Message Text</label>
+        <textarea id="iqcMessage" placeholder="Enter your message..." rows="3" class="iphone-textarea">Hello, this is a test message from iPhone Chat Generator!</textarea>
+      </div>
+      
+      <button onclick="generateIphoneChatClientSide()" class="btn-primary" id="iqcGenerateBtn" style="width: 100%;">
+        <i class="fas fa-bolt"></i> Generate iPhone Chat (Client-side)
+      </button>
+      
+      <div class="iphone-info" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+          <i class="fas fa-info-circle"></i> Generates iPhone-style chat screenshots directly in your browser.
+        </p>
+      </div>
+      
+      <div id="iqcResult" class="iphone-result"></div>
+      
+      <!-- Hidden template for screenshot -->
+      <div id="iphoneTemplate" style="display: none;"></div>
+    </div>
+    
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const iphoneSection = document.getElementById('iphonegenerator');
+  iphoneSection.innerHTML = iphoneHTML;
+  iphoneSection.style.display = 'block';
+}
+
+async function generateIphoneChatClientSide() {
+  const time = document.getElementById('iqcTime').value.trim();
+  const battery = document.getElementById('iqcBattery').value.trim();
+  const carrier = document.getElementById('iqcCarrier').value.trim();
+  const msg = document.getElementById('iqcMessage').value.trim();
+  const resultBox = document.getElementById('iqcResult');
+  const btn = document.getElementById('iqcGenerateBtn');
+  const template = document.getElementById('iphoneTemplate');
+  
+  resultBox.innerHTML = "";
+
+  // Validation
+  if (!time || !battery || !carrier || !msg) {
+    showNotification('<i class="fas fa-exclamation-triangle"></i> Please fill all fields');
+    return;
+  }
+
+  // Disable button and show loading
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+  }
+
+  resultBox.innerHTML = `
+    <div class="iphone-status">
+      <i class="fas fa-spinner fa-spin"></i> Creating iPhone chat screenshot...
+    </div>
+  `;
+
+  try {
+    // Create iPhone template
+    template.innerHTML = `
+      <div style="
+        width: 375px;
+        height: 667px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 40px;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        margin: 0 auto;
+      ">
+        <!-- Status Bar -->
+        <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 20px;
+          background: rgba(0,0,0,0.8);
+          border-radius: 20px 20px 0 0;
+          color: white;
+          font-size: 14px;
+          font-weight: 600;
+        ">
+          <span>${time}</span>
+          <span>${carrier}</span>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <span>${battery}%</span>
+            <i class="fas fa-battery-three-quarters"></i>
+          </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div style="
+          background: white;
+          height: calc(100% - 60px);
+          border-radius: 0 0 20px 20px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+        ">
+          <!-- Chat Header -->
+          <div style="
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #e5e5e7;
+            margin-bottom: 20px;
+          ">
+            <div style="font-weight: bold; font-size: 18px; color: #000;">iMessage</div>
+            <div style="font-size: 14px; color: #8e8e93;">${carrier}</div>
+          </div>
+
+          <!-- Messages -->
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <!-- Received Message -->
+            <div style="align-self: flex-start; max-width: 70%;">
+              <div style="
+                background: #e5e5e7;
+                padding: 12px 16px;
+                border-radius: 18px;
+                border-bottom-left-radius: 4px;
+                color: #000;
+                font-size: 16px;
+                line-height: 1.4;
+              ">
+                Hey there! How are you doing?
+              </div>
+              <div style="font-size: 12px; color: #8e8e93; margin-top: 4px; text-align: left;">
+                17:45
+              </div>
+            </div>
+
+            <!-- Sent Message -->
+            <div style="align-self: flex-end; max-width: 70%;">
+              <div style="
+                background: #007aff;
+                padding: 12px 16px;
+                border-radius: 18px;
+                border-bottom-right-radius: 4px;
+                color: white;
+                font-size: 16px;
+                line-height: 1.4;
+              ">
+                ${msg}
+              </div>
+              <div style="font-size: 12px; color: #8e8e93; margin-top: 4px; text-align: right;">
+                ${time}
+              </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div style="align-self: flex-start; max-width: 70%;">
+              <div style="
+                background: #e5e5e7;
+                padding: 12px 16px;
+                border-radius: 18px;
+                border-bottom-left-radius: 4px;
+                color: #8e8e93;
+                font-size: 16px;
+              ">
+                <i class="fas fa-ellipsis-h"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input Bar -->
+          <div style="
+            display: flex;
+            gap: 10px;
+            padding: 15px 0 0 0;
+            border-top: 1px solid #e5e5e7;
+          ">
+            <div style="
+              flex: 1;
+              background: #e5e5e7;
+              border-radius: 20px;
+              padding: 12px 20px;
+              color: #8e8e93;
+              font-size: 16px;
+            ">
+              iMessage
+            </div>
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: #007aff;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+            ">
+              <i class="fas fa-arrow-up"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Home Indicator -->
+        <div style="
+          position: absolute;
+          bottom: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 134px;
+          height: 5px;
+          background: black;
+          border-radius: 3px;
+          opacity: 0.3;
+        "></div>
+      </div>
+    `;
+
+    // Wait a bit for the template to render
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Generate screenshot
+    const canvas = await html2canvas(template.firstChild, {
+      backgroundColor: null,
+      scale: 2, // Higher quality
+      useCORS: true,
+      allowTaint: true,
+      logging: false
+    });
+
+    // Convert to blob
+    canvas.toBlob(async (blob) => {
+      const imgUrl = URL.createObjectURL(blob);
+      
+      resultBox.innerHTML = `
+        <div style="text-align: center;">
+          <h3 style="color: var(--text-primary); margin-bottom: 1rem;">
+            <i class="fas fa-check-circle"></i> Successfully Generated!
+          </h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            Time: ${time} | Battery: ${battery}% | Carrier: ${carrier}
+          </p>
+          <img src="${imgUrl}" class="iphone-image" alt="iPhone chat image" style="max-width: 300px; border: 2px solid rgba(255,255,255,0.3); border-radius: 20px;"/>
+          <div class="iphone-actions">
+            <a href="${imgUrl}" download="iphone_chat_${Date.now()}.png">
+              <button class="btn-primary">
+                <i class="fas fa-download"></i> Download Image
+              </button>
+            </a>
+            <button onclick="window.open('${imgUrl}', '_blank')" class="btn-secondary">
+              <i class="fas fa-external-link-alt"></i> Open in New Tab
+            </button>
+            <button onclick="regenerateIphoneChat()" class="btn-secondary">
+              <i class="fas fa-redo"></i> Generate Again
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Clean up
+      template.innerHTML = '';
+      
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-bolt"></i> Generate iPhone Chat (Client-side)';
+      }
+      
+      showNotification('<i class="fas fa-check"></i> iPhone chat generated successfully!');
+      
+    }, 'image/png', 0.9);
+
+  } catch (error) {
+    console.error('Generation failed:', error);
+    
+    resultBox.innerHTML = `
+      <div class="nik-error" style="text-align: center; padding: 2rem;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3>Generation Failed</h3>
+        <p>${error.message}</p>
+        <div style="margin-top: 1.5rem;">
+          <button onclick="generateIphoneChatClientSide()" class="btn-primary">
+            <i class="fas fa-redo"></i> Try Again
+          </button>
+        </div>
+      </div>
+    `;
+    
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-bolt"></i> Generate iPhone Chat (Client-side)';
+    }
+    
+    showNotification('<i class="fas fa-times"></i> Generation failed');
+  }
+}
+
+function regenerateIphoneChat() {
+  generateIphoneChatClientSide();
 }
 
 // ===== 🔐 PASSWORD GENERATOR =====
