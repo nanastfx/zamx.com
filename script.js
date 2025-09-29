@@ -220,7 +220,7 @@ function copyNIKResult() {
     }
 
 // ===== 📱 IPHONE QUOTED GENERATOR =====
-function showIphoneGenerator() {
+/*function showIphoneGenerator() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
   const iphoneHTML = `
@@ -494,6 +494,153 @@ function showFallbackPreview() {
       </div>
     </div>
   `;
+}*/
+
+// ===== 📱 IPHONE QUOTED GENERATOR (URL REDIRECT) =====
+function showIphoneGenerator() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const iphoneHTML = `
+    <div class="section-title">
+      <i class="fas fa-mobile-alt"></i>
+      iPhone Quoted Generator
+    </div>
+    
+    <div class="iphone-container">
+      <div class="iphone-input-group">
+        <label class="iphone-label">Time (e.g., 11:26)</label>
+        <input type="text" id="iqcTime" placeholder="Enter time (e.g., 11:26)" class="iphone-input" value="11:26" oninput="updatePreviewUrl()">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Battery Percentage</label>
+        <input type="number" id="iqcBattery" placeholder="Enter battery (1-100)" class="iphone-input" min="1" max="100" value="88" oninput="updatePreviewUrl()">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Carrier Name</label>
+        <input type="text" id="iqcCarrier" placeholder="Enter carrier name" class="iphone-input" value="INDOSAT OOREDOO" oninput="updatePreviewUrl()">
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Message Text</label>
+        <textarea id="iqcMessage" placeholder="Enter your message..." rows="3" class="iphone-textarea" oninput="updatePreviewUrl()">Hello, this is a test message!</textarea>
+      </div>
+      
+      <div class="iphone-input-group">
+        <label class="iphone-label">Signal Strength (1-5)</label>
+        <input type="number" id="iqcSignal" placeholder="Enter signal (1-5)" class="iphone-input" min="1" max="5" value="4" oninput="updatePreviewUrl()">
+      </div>
+      
+      <!-- Preview URL -->
+      <div id="urlPreview" class="iphone-info" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; margin-top: 1rem; display: none;">
+        <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 0 0 0.5rem 0;">
+          <i class="fas fa-link"></i> Generated URL:
+        </p>
+        <div style="background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem;">
+          <code id="previewUrlText" style="color: #4ecdc4; font-size: 0.75rem; word-break: break-all;"></code>
+        </div>
+        <button onclick="redirectToGeneratedUrl()" class="btn-primary" id="seeResultsBtn" style="width: 100%;">
+          <i class="fas fa-external-link-alt"></i> See Results
+        </button>
+      </div>
+      
+      <div class="iphone-info" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+          <i class="fas fa-info-circle"></i> Fill the form above to generate iPhone quoted image URL
+        </p>
+      </div>
+    </div>
+    
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const iphoneSection = document.getElementById('iphonegenerator');
+  iphoneSection.innerHTML = iphoneHTML;
+  iphoneSection.style.display = 'block';
+  
+  // Initialize preview URL
+  updatePreviewUrl();
+}
+
+function updatePreviewUrl() {
+  const time = document.getElementById('iqcTime').value.trim();
+  const battery = document.getElementById('iqcBattery').value.trim();
+  const carrier = document.getElementById('iqcCarrier').value.trim();
+  const message = document.getElementById('iqcMessage').value.trim();
+  const signal = document.getElementById('iqcSignal').value.trim();
+  const urlPreview = document.getElementById('urlPreview');
+  const previewUrlText = document.getElementById('previewUrlText');
+  
+  // Basic validation
+  if (!time || !battery || !carrier) {
+    urlPreview.style.display = 'none';
+    return;
+  }
+  
+  // Build URL parameters
+  const params = new URLSearchParams();
+  params.append('time', time);
+  params.append('batteryPercentage', battery);
+  params.append('carrierName', carrier);
+  params.append('messageText', message);
+  params.append('signalStrength', signal);
+  params.append('emojiStyle', 'apple');
+  
+  const baseUrl = 'https://brat.siputzx.my.id/iphone-quoted';
+  const fullUrl = `${baseUrl}?${params.toString()}`;
+  
+  // Display preview
+  previewUrlText.textContent = fullUrl;
+  urlPreview.style.display = 'block';
+}
+
+function redirectToGeneratedUrl() {
+  const time = document.getElementById('iqcTime').value.trim();
+  const battery = document.getElementById('iqcBattery').value.trim();
+  const carrier = document.getElementById('iqcCarrier').value.trim();
+  const message = document.getElementById('iqcMessage').value.trim();
+  const signal = document.getElementById('iqcSignal').value.trim();
+  
+  // Validation
+  if (!time || !battery || !carrier) {
+    showNotification('<i class="fas fa-exclamation-triangle"></i> Please fill required fields');
+    return;
+  }
+  
+  // Build final URL
+  const params = new URLSearchParams();
+  params.append('time', time);
+  params.append('batteryPercentage', battery);
+  params.append('carrierName', carrier);
+  params.append('messageText', message);
+  params.append('signalStrength', signal);
+  params.append('emojiStyle', 'apple');
+  
+  const baseUrl = 'https://brat.siputzx.my.id/iphone-quoted';
+  const finalUrl = `${baseUrl}?${params.toString()}`;
+  
+  // Show loading
+  const btn = document.getElementById('seeResultsBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+  }
+  
+  showNotification('<i class="fas fa-external-link-alt"></i> Redirecting to generated image...');
+  
+  // Redirect after short delay
+  setTimeout(() => {
+    window.open(finalUrl, '_blank');
+    
+    // Reset button
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-external-link-alt"></i> See Results';
+    }
+  }, 1000);
 }
 
 // ===== 📱 IPHONE QUOTED GENERATOR (CLIENT-SIDE) =====
