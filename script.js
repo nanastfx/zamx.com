@@ -220,7 +220,7 @@ function copyNIKResult() {
     }
 
 // ===== 📱 IPHONE QUOTED GENERATOR =====
-/*function showIphoneGenerator() {
+function showIphoneGenerator() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
   const iphoneHTML = `
@@ -494,10 +494,10 @@ function showFallbackPreview() {
       </div>
     </div>
   `;
-}*/
+}
 
 // ===== 📱 IPHONE QUOTED GENERATOR (CLIENT-SIDE) =====
-function showIphoneGenerator() {
+/*function showIphoneGenerator() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
   const iphoneHTML = `
@@ -818,7 +818,7 @@ async function generateIphoneChatClientSide() {
 
 function regenerateIphoneChat() {
   generateIphoneChatClientSide();
-}
+}*/
 
 // ===== 🔐 PASSWORD GENERATOR =====
 function showPasswordGenerator() {
