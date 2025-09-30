@@ -1284,7 +1284,7 @@ function adminLogout() {
 }*/
 
 // ===== 🎵 MUSIC PLAYER =====
-function showMusicPlayer() {
+/*function showMusicPlayer() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
   const musicHTML = `
@@ -1514,7 +1514,268 @@ document.addEventListener('keydown', function(e) {
         break;
     }
   }
-});
+});*/
+
+// ===== 🎵 MUSIC PLAYER VARIABLES =====
+let currentAudio = null;
+let currentTrackIndex = 0;
+let isPlaying = false;
+let isRandom = false;
+
+const defaultPlaylist = [
+  {
+    title: "Lofi Study",
+    artist: "Chill Vibes",
+    cover: "🎵",
+    url: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_d5ba5c7c95.mp3?filename=lofi-study-112191.mp3",
+    duration: "2:45"
+  },
+  {
+    title: "Relaxing Piano", 
+    artist: "Peaceful Music",
+    cover: "🎹",
+    url: "https://cdn.pixabay.com/download/audio/2022/11/11/audio_526e4b8e5c.mp3?filename=relaxing-piano-121912.mp3",
+    duration: "3:20"
+  },
+  {
+    title: "Ambient Space",
+    artist: "Cosmic Sounds", 
+    cover: "🌌",
+    url: "https://cdn.pixabay.com/download/audio/2022/10/25/audio_6a8e4f0b1e.mp3?filename=ambient-space-120994.mp3",
+    duration: "4:15"
+  }
+];
+
+// ===== 🎵 MUSIC PLAYER FUNCTIONS =====
+function showMusicPlayer() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const musicHTML = `
+    <div class="section-title">
+      <i class="fas fa-music"></i>
+      Music Player
+    </div>
+
+    <div class="music-container">
+      <div class="music-player">
+        <div class="music-cover" id="musicCover">
+          🎵
+        </div>
+        
+        <div class="music-info">
+          <div class="music-title" id="musicTitle">Select a song</div>
+          <div class="music-artist" id="musicArtist">-</div>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="time-display">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+
+        <div class="controls">
+          <button class="control-btn" onclick="previousTrack()">
+            <i class="fas fa-step-backward"></i>
+          </button>
+          
+          <button class="control-btn play-pause" onclick="togglePlay()">
+            <i class="fas fa-play" id="playIcon"></i>
+          </button>
+          
+          <button class="control-btn" onclick="nextTrack()">
+            <i class="fas fa-step-forward"></i>
+          </button>
+        </div>
+
+        <div class="volume-control">
+          <i class="fas fa-volume-up"></i>
+          <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.7">
+        </div>
+
+        <button class="random-btn" id="randomBtn" onclick="toggleRandom()">
+          <i class="fas fa-random"></i> Random
+        </button>
+
+        <div class="playlist" id="playlist">
+          <h4 style="text-align: left; margin-bottom: 1rem; color: var(--text-primary);">
+            <i class="fas fa-list"></i> Playlist
+          </h4>
+          ${generatePlaylistHTML()}
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const musicSection = document.getElementById('musicplayer');
+  musicSection.innerHTML = musicHTML;
+  musicSection.style.display = 'block';
+  
+  // Initialize music player
+  initializeMusicPlayer();
+}
+
+function generatePlaylistHTML() {
+  return defaultPlaylist.map((track, index) => `
+    <div class="playlist-item ${index === currentTrackIndex ? 'active' : ''}" onclick="playTrack(${index})">
+      <div style="width: 40px; height: 40px; border-radius: 5px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+        ${track.cover}
+      </div>
+      <div class="playlist-info">
+        <div class="playlist-title">${track.title}</div>
+        <div class="playlist-artist">${track.artist}</div>
+      </div>
+      <div class="playlist-duration">${track.duration}</div>
+    </div>
+  `).join('');
+}
+
+function initializeMusicPlayer() {
+  // Volume control
+  const volumeSlider = document.getElementById('volumeSlider');
+  if (volumeSlider) {
+    volumeSlider.addEventListener('input', function() {
+      if (currentAudio) {
+        currentAudio.volume = this.value;
+      }
+    });
+  }
+
+  // Progress bar click
+  const progressContainer = document.getElementById('progressContainer');
+  if (progressContainer) {
+    progressContainer.addEventListener('click', function(e) {
+      if (!currentAudio) return;
+      
+      const width = this.clientWidth;
+      const clickX = e.offsetX;
+      const duration = currentAudio.duration;
+      
+      currentAudio.currentTime = (clickX / width) * duration;
+    });
+  }
+}
+
+function playTrack(index) {
+  // Stop current audio if playing
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+
+  currentTrackIndex = index;
+  const track = defaultPlaylist[index];
+
+  // Update UI
+  document.getElementById('musicTitle').textContent = track.title;
+  document.getElementById('musicArtist').textContent = track.artist;
+  document.getElementById('musicCover').textContent = track.cover;
+
+  // Update playlist active state
+  document.querySelectorAll('.playlist-item').forEach((item, i) => {
+    item.classList.toggle('active', i === index);
+  });
+
+  // Create new audio element
+  currentAudio = new Audio(track.url);
+  currentAudio.volume = document.getElementById('volumeSlider').value;
+
+  // Audio event listeners
+  currentAudio.addEventListener('loadedmetadata', function() {
+    document.getElementById('duration').textContent = formatTime(this.duration);
+  });
+
+  currentAudio.addEventListener('timeupdate', function() {
+    const progressPercent = (this.currentTime / this.duration) * 100;
+    document.getElementById('progressBar').style.width = `${progressPercent}%`;
+    document.getElementById('currentTime').textContent = formatTime(this.currentTime);
+  });
+
+  currentAudio.addEventListener('ended', function() {
+    nextTrack();
+  });
+
+  // Play the audio
+  currentAudio.play().catch(e => {
+    console.log('Audio play failed:', e);
+    showNotification('<i class="fas fa-exclamation-triangle"></i> Cannot play audio. Please try another track.');
+  });
+  
+  isPlaying = true;
+  updatePlayButton();
+}
+
+function togglePlay() {
+  if (!currentAudio) {
+    playTrack(0);
+    return;
+  }
+
+  if (isPlaying) {
+    currentAudio.pause();
+  } else {
+    currentAudio.play().catch(e => {
+      console.log('Audio play failed:', e);
+    });
+  }
+  
+  isPlaying = !isPlaying;
+  updatePlayButton();
+}
+
+function updatePlayButton() {
+  const playIcon = document.getElementById('playIcon');
+  if (playIcon) {
+    playIcon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+  }
+}
+
+function previousTrack() {
+  let newIndex;
+  if (isRandom) {
+    newIndex = Math.floor(Math.random() * defaultPlaylist.length);
+  } else {
+    newIndex = currentTrackIndex - 1;
+    if (newIndex < 0) newIndex = defaultPlaylist.length - 1;
+  }
+  playTrack(newIndex);
+}
+
+function nextTrack() {
+  let newIndex;
+  if (isRandom) {
+    newIndex = Math.floor(Math.random() * defaultPlaylist.length);
+  } else {
+    newIndex = currentTrackIndex + 1;
+    if (newIndex >= defaultPlaylist.length) newIndex = 0;
+  }
+  playTrack(newIndex);
+}
+
+function toggleRandom() {
+  isRandom = !isRandom;
+  const randomBtn = document.getElementById('randomBtn');
+  if (randomBtn) {
+    randomBtn.classList.toggle('active', isRandom);
+    randomBtn.innerHTML = isRandom ? 
+      '<i class="fas fa-random"></i> Random ON' : 
+      '<i class="fas fa-random"></i> Random';
+  }
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 // ===== 📶 QR WIFI READER =====
 function showQRWiFiReader() {
