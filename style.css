@@ -1379,7 +1379,7 @@ h1 {
   animation: spin 1s linear infinite;
 }
 
-/* Code block styles for AI responses */
+ Code block styles for AI responses 
 .ai-code-block-container {
   margin: 1rem 0;
   border-radius: 0.75rem;
@@ -1460,7 +1460,7 @@ h1 {
   white-space: nowrap;
 }
 
-/* Mobile responsive */
+Mobile responsive 
 @media (max-width: 768px) {
   .ai-container {
     height: 85vh;
@@ -1491,7 +1491,7 @@ h1 {
   }
 }
 
-/* Scrollbar styling */
+ Scrollbar styling 
 .ai-chat-messages::-webkit-scrollbar {
   width: 6px;
 }
@@ -1511,7 +1511,7 @@ h1 {
 }*/
 
 /* ===== 🤖 AI ASSISTANT STYLES ===== */
-.ai-container {
+/*.ai-container {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1868,7 +1868,6 @@ h1 {
   animation: spin 1s linear infinite;
 }
 
-/* Code block styles for AI responses */
 .ai-code-block-container {
   margin: 1rem 0;
   border-radius: 0.75rem;
@@ -1949,7 +1948,7 @@ h1 {
   white-space: nowrap;
 }
 
-/* Mobile responsive */
+
 @media (max-width: 768px) {
   .ai-container {
     height: 85vh;
@@ -1981,7 +1980,6 @@ h1 {
   }
 }
 
-/* Scrollbar styling */
 .ai-chat-messages::-webkit-scrollbar {
   width: 6px;
 }
@@ -1998,7 +1996,7 @@ h1 {
 
 .ai-chat-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(78, 205, 196, 0.7);
-}
+}*/
 
 /* ===== 📱 IPHONE QUOTED GENERATOR STYLES ===== */
 .iphone-container {
