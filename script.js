@@ -967,6 +967,292 @@ function regenerateIphoneChat() {
   generateIphoneChatClientSide();
 }*/
 
+// ===== 🤖 AI ASSISTANT =====
+function showAIAssistant() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const aiHTML = `
+    <div class="section-title">
+      <i class="fas fa-robot"></i>
+      AI Assistant
+    </div>
+    
+    <div class="ai-container">
+      <div class="ai-sidebar">
+        <div class="ai-sidebar-header">
+          <h2><i class="fas fa-robot"></i> zamx</h2>
+        </div>
+        
+        <button class="ai-new-chat-btn" id="aiNewChatBtn">
+          <i class="fas fa-plus"></i> New Chat
+        </button>
+        
+        <div class="ai-chat-history">
+          <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+            <i class="fas fa-history"></i> Chat History
+          </h3>
+          <div class="ai-history-list" id="aiHistoryList">
+            <!-- History items will be added here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-main-content">
+        <div class="ai-top-nav">
+          <h1>ZAM AI Assistant</h1>
+          <div class="ai-nav-actions">
+            <button class="ai-theme-toggle" id="aiThemeToggle">
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="ai-chat-container">
+          <div class="ai-chat-messages" id="aiChatMessages">
+            <div class="ai-welcome-message">
+              <div class="ai-bot-avatar">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="ai-message-content">
+                <h3 style="margin-bottom: 0.5rem;">Welcome to zam-ai!</h3>
+                <p style="margin: 0;">I'm your AI assistant created by Azam el tukam. I can help you with coding, homework, general questions, and analyze images or files. How can I assist you today?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-message-input-container">
+          <div class="ai-input-wrapper">
+            <input type="file" id="aiFileInput" accept="*/*" style="display: none;">
+            <button class="ai-file-upload-btn" id="aiFileUploadBtn" title="Upload file">
+              <i class="fas fa-paperclip"></i>
+            </button>
+            <input type="text" id="aiMessageInput" placeholder="Type your message..." />
+            <button class="ai-send-btn" id="aiSendBtn">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <div class="ai-file-preview" id="aiFilePreview">
+            <div class="ai-file-info">
+              <span class="ai-file-name" id="aiFileName"></span>
+              <button class="ai-remove-file" id="aiRemoveFile">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-loading-overlay" id="aiLoadingOverlay">
+      <div class="ai-loading-spinner">
+        <i class="fas fa-robot"></i>
+        <p>zam-ai is thinking...</p>
+      </div>
+    </div>
+
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const aiSection = document.getElementById('aiassistant');
+  aiSection.innerHTML = aiHTML;
+  aiSection.style.display = 'block';
+  
+  // Initialize AI Assistant
+  initializeAIAssistant();
+}
+
+function initializeAIAssistant() {
+  // This is a simplified version - you can expand this with the full AI functionality
+  const messageInput = document.getElementById('aiMessageInput');
+  const sendBtn = document.getElementById('aiSendBtn');
+  const fileInput = document.getElementById('aiFileInput');
+  const fileUploadBtn = document.getElementById('aiFileUploadBtn');
+  const removeFileBtn = document.getElementById('aiRemoveFile');
+  const filePreview = document.getElementById('aiFilePreview');
+  const fileName = document.getElementById('aiFileName');
+  const newChatBtn = document.getElementById('aiNewChatBtn');
+  const themeToggle = document.getElementById('aiThemeToggle');
+  
+  // File upload handling
+  fileUploadBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+  
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) {
+      const file = e.target.files[0];
+      fileName.textContent = file.name;
+      filePreview.style.display = 'block';
+    }
+  });
+  
+  removeFileBtn.addEventListener('click', () => {
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+  });
+  
+  // Send message handling
+  function sendMessage() {
+    const message = messageInput.value.trim();
+    const file = fileInput.files[0];
+    
+    if (!message && !file) return;
+    
+    // Add user message
+    addAIMessage('user', message, file);
+    
+    // Clear input
+    messageInput.value = '';
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+    
+    // Show loading
+    const loadingOverlay = document.getElementById('aiLoadingOverlay');
+    loadingOverlay.style.display = 'flex';
+    
+    // Simulate AI response (replace with actual AI API call)
+    setTimeout(() => {
+      const responses = [
+        "I understand your question! As an AI assistant, I can help you with various tasks including coding, analysis, and general knowledge.",
+        "That's an interesting query! I'd be happy to help you with that. Could you provide more details?",
+        "Great question! Based on my analysis, here's what I can suggest...",
+        "I've processed your request. Here's the information you're looking for:",
+        "As your AI assistant, I'm here to help! Let me break this down for you..."
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      addAIMessage('bot', randomResponse);
+      
+      // Hide loading
+      loadingOverlay.style.display = 'none';
+    }, 2000);
+  }
+  
+  // Enter key to send message
+  messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  
+  // Send button click
+  sendBtn.addEventListener('click', sendMessage);
+  
+  // New chat button
+  newChatBtn.addEventListener('click', () => {
+    const chatMessages = document.getElementById('aiChatMessages');
+    chatMessages.innerHTML = `
+      <div class="ai-welcome-message">
+        <div class="ai-bot-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="ai-message-content">
+          <h3 style="margin-bottom: 0.5rem;">New Chat Started!</h3>
+          <p style="margin: 0;">I'm ready to help you with anything you need. What would you like to know or work on today?</p>
+        </div>
+      </div>
+    `;
+  });
+  
+  // Theme toggle for AI section
+  themeToggle.addEventListener('click', () => {
+    const icon = themeToggle.querySelector('i');
+    if (icon.classList.contains('fa-moon')) {
+      icon.className = 'fas fa-sun';
+      showNotification('<i class="fas fa-sun"></i> AI Assistant theme changed');
+    } else {
+      icon.className = 'fas fa-moon';
+      showNotification('<i class="fas fa-moon"></i> AI Assistant theme changed');
+    }
+  });
+}
+
+function addAIMessage(sender, text, file = null) {
+  const chatMessages = document.getElementById('aiChatMessages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `ai-message ${sender}`;
+
+  const avatarDiv = document.createElement('div');
+  avatarDiv.className = 'ai-message-avatar';
+  avatarDiv.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'ai-message-content';
+
+  if (file && sender === 'user') {
+    const fileDiv = document.createElement('div');
+    fileDiv.className = 'file-attachment';
+    fileDiv.innerHTML = `<i class="fas fa-file"></i> <span>${file.name}</span>`;
+    contentDiv.appendChild(fileDiv);
+  }
+
+  if (text) {
+    const textDiv = document.createElement('div');
+    textDiv.innerHTML = formatAIMessage(text);
+    contentDiv.appendChild(textDiv);
+  }
+
+  messageDiv.appendChild(avatarDiv);
+  messageDiv.appendChild(contentDiv);
+  chatMessages.appendChild(messageDiv);
+
+  // Scroll to bottom
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatAIMessage(text) {
+  // Simple formatting for demonstration
+  let formattedText = text;
+  
+  // Convert code blocks
+  formattedText = formattedText.replace(/```(\w+)?\s*\n?([\s\S]*?)```/g, (match, language, code) => {
+    const lang = language || 'text';
+    const codeId = 'ai_code_' + Math.random().toString(36).substr(2, 9);
+    
+    return `
+      <div class="ai-code-block-container">
+        <div class="ai-code-header">
+          <span class="ai-code-language">${lang.toUpperCase()}</span>
+          <button class="ai-copy-code-btn" onclick="copyAICode('${codeId}')">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+        <pre><code id="${codeId}">${code.trim()}</code></pre>
+      </div>
+    `;
+  });
+  
+  // Convert inline code
+  formattedText = formattedText.replace(/`([^`\n]+)`/g, '<code class="ai-inline-code">$1</code>');
+  
+  // Convert newlines to <br>
+  formattedText = formattedText.replace(/\n/g, '<br>');
+  
+  return formattedText;
+}
+
+function copyAICode(codeId) {
+  const codeElement = document.getElementById(codeId);
+  if (codeElement) {
+    const text = codeElement.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const copyBtn = codeElement.closest('.ai-code-block-container').querySelector('.ai-copy-code-btn');
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      copyBtn.style.background = '#10b981';
+      
+      setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+        copyBtn.style.background = '';
+      }, 2000);
+    });
+  }
+}
+
 // ===== 🔐 PASSWORD GENERATOR =====
 function showPasswordGenerator() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
