@@ -968,7 +968,7 @@ function regenerateIphoneChat() {
 }*/
 
 // ===== 🤖 AI ASSISTANT =====
-function showAIAssistant() {
+/*function showAIAssistant() {
   document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
   
   const aiHTML = `
@@ -1187,6 +1187,532 @@ function addAIMessage(sender, text, file = null) {
     const fileDiv = document.createElement('div');
     fileDiv.className = 'file-attachment';
     fileDiv.innerHTML = `<i class="fas fa-file"></i> <span>${file.name}</span>`;
+    contentDiv.appendChild(fileDiv);
+  }
+
+  if (text) {
+    const textDiv = document.createElement('div');
+    textDiv.innerHTML = formatAIMessage(text);
+    contentDiv.appendChild(textDiv);
+  }
+
+  messageDiv.appendChild(avatarDiv);
+  messageDiv.appendChild(contentDiv);
+  chatMessages.appendChild(messageDiv);
+
+  // Scroll to bottom
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatAIMessage(text) {
+  // Simple formatting for demonstration
+  let formattedText = text;
+  
+  // Convert code blocks
+  formattedText = formattedText.replace(/```(\w+)?\s*\n?([\s\S]*?)```/g, (match, language, code) => {
+    const lang = language || 'text';
+    const codeId = 'ai_code_' + Math.random().toString(36).substr(2, 9);
+    
+    return `
+      <div class="ai-code-block-container">
+        <div class="ai-code-header">
+          <span class="ai-code-language">${lang.toUpperCase()}</span>
+          <button class="ai-copy-code-btn" onclick="copyAICode('${codeId}')">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+        <pre><code id="${codeId}">${code.trim()}</code></pre>
+      </div>
+    `;
+  });
+  
+  // Convert inline code
+  formattedText = formattedText.replace(/`([^`\n]+)`/g, '<code class="ai-inline-code">$1</code>');
+  
+  // Convert newlines to <br>
+  formattedText = formattedText.replace(/\n/g, '<br>');
+  
+  return formattedText;
+}
+
+function copyAICode(codeId) {
+  const codeElement = document.getElementById(codeId);
+  if (codeElement) {
+    const text = codeElement.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const copyBtn = codeElement.closest('.ai-code-block-container').querySelector('.ai-copy-code-btn');
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      copyBtn.style.background = '#10b981';
+      
+      setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+        copyBtn.style.background = '';
+      }, 2000);
+    });
+  }
+}*/
+
+// ===== 🤖 AI ASSISTANT =====
+function showAIAssistant() {
+  document.querySelectorAll('.main-content').forEach(el => el.style.display = 'none');
+  
+  const aiHTML = `
+    <div class="section-title">
+      <i class="fas fa-code"></i>
+      AI Programming Assistant
+    </div>
+    
+    <div class="ai-container">
+      <div class="ai-sidebar">
+        <div class="ai-sidebar-header">
+          <h2><i class="fas fa-terminal"></i> DevAI</h2>
+        </div>
+        
+        <button class="ai-new-chat-btn" id="aiNewChatBtn">
+          <i class="fas fa-plus"></i> New Session
+        </button>
+        
+        <div class="ai-chat-history">
+          <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+            <i class="fas fa-history"></i> Session History
+          </h3>
+          <div class="ai-history-list" id="aiHistoryList">
+            <div class="ai-history-item active">
+              <div style="font-weight: 600;">Current Session</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">Programming & Security</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-main-content">
+        <div class="ai-top-nav">
+          <h1>DevAI - Programming & Security</h1>
+          <div class="ai-nav-actions">
+            <button class="ai-theme-toggle" id="aiThemeToggle">
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="ai-chat-container">
+          <div class="ai-chat-messages" id="aiChatMessages">
+            <div class="ai-welcome-message">
+              <div class="ai-bot-avatar">
+                <i class="fas fa-terminal"></i>
+              </div>
+              <div class="ai-message-content">
+                <h3 style="margin-bottom: 0.5rem;">🚀 DevAI - Programming & Security Assistant</h3>
+                <p style="margin: 0; line-height: 1.6;">
+                  <strong>Specialized in:</strong><br>
+                  • Full-stack Development (HTML, CSS, JS, Python, PHP)<br>
+                  • Cybersecurity & Ethical Hacking<br>
+                  • Bug Fixing & Code Optimization<br>
+                  • API Development & Integration<br>
+                  • System Administration & DevOps<br><br>
+                  <em>Ask me about coding, security, or any technical challenge!</em>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-message-input-container">
+          <div class="ai-input-wrapper">
+            <input type="file" id="aiFileInput" accept=".js,.py,.php,.html,.css,.java,.c,.cpp,.cs,.rb,.go,.rs,.sql,.json,.xml,.txt,.md" style="display: none;">
+            <button class="ai-file-upload-btn" id="aiFileUploadBtn" title="Upload code file">
+              <i class="fas fa-file-code"></i>
+            </button>
+            <input type="text" id="aiMessageInput" placeholder="Ask about programming, security, or upload code..." />
+            <button class="ai-send-btn" id="aiSendBtn">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <div class="ai-file-preview" id="aiFilePreview">
+            <div class="ai-file-info">
+              <span class="ai-file-name" id="aiFileName"></span>
+              <button class="ai-remove-file" id="aiRemoveFile">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-loading-overlay" id="aiLoadingOverlay">
+      <div class="ai-loading-spinner">
+        <i class="fas fa-terminal"></i>
+        <p>DevAI is analyzing...</p>
+      </div>
+    </div>
+
+    <button class="btn-secondary" onclick="backToMain()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
+  `;
+  
+  const aiSection = document.getElementById('aiassistant');
+  aiSection.innerHTML = aiHTML;
+  aiSection.style.display = 'block';
+  
+  // Initialize AI Assistant
+  initializeAIAssistant();
+}
+
+function initializeAIAssistant() {
+  const messageInput = document.getElementById('aiMessageInput');
+  const sendBtn = document.getElementById('aiSendBtn');
+  const fileInput = document.getElementById('aiFileInput');
+  const fileUploadBtn = document.getElementById('aiFileUploadBtn');
+  const removeFileBtn = document.getElementById('aiRemoveFile');
+  const filePreview = document.getElementById('aiFilePreview');
+  const fileName = document.getElementById('aiFileName');
+  const newChatBtn = document.getElementById('aiNewChatBtn');
+  const themeToggle = document.getElementById('aiThemeToggle');
+  
+  // Programming-focused responses
+  const programmingResponses = [
+    "I've analyzed your code. Here's the optimized version with better security practices...",
+    "For this security vulnerability, I recommend implementing input validation and sanitization...",
+    "Here's the complete solution with error handling and security measures...",
+    "I found potential issues in your code. Let me show you the secure implementation...",
+    "This is a common programming pattern. Here's the most efficient way to implement it...",
+    "For better performance and security, consider using this approach instead...",
+    "I've identified the bug. Here's the fix with proper error handling...",
+    "This security issue can be mitigated by implementing proper authentication...",
+    "Here's the complete API implementation with proper validation and error handling...",
+    "I've optimized your algorithm for better time complexity and memory usage..."
+  ];
+
+  const hackingResponses = [
+    "From a security perspective, this vulnerability can be exploited through...",
+    "For ethical hacking purposes, here's how to test this security issue...",
+    "This security flaw can be patched by implementing proper input sanitization...",
+    "Here are the penetration testing techniques for this type of vulnerability...",
+    "I recommend these security measures to prevent common attack vectors...",
+    "For secure coding practices, always validate and sanitize user inputs...",
+    "This is a typical OWASP Top 10 vulnerability. Here's the mitigation...",
+    "From a red team perspective, here's how this could be exploited...",
+    "Implement proper authentication and authorization to prevent unauthorized access...",
+    "Here's the secure code implementation with protection against common attacks..."
+  ];
+  
+  // File upload handling
+  fileUploadBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+  
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) {
+      const file = e.target.files[0];
+      fileName.textContent = file.name;
+      filePreview.style.display = 'block';
+    }
+  });
+  
+  removeFileBtn.addEventListener('click', () => {
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+  });
+  
+  // Send message handling
+  function sendMessage() {
+    const message = messageInput.value.trim();
+    const file = fileInput.files[0];
+    
+    if (!message && !file) return;
+    
+    // Add user message
+    addAIMessage('user', message, file);
+    
+    // Clear input
+    messageInput.value = '';
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+    
+    // Show loading
+    const loadingOverlay = document.getElementById('aiLoadingOverlay');
+    loadingOverlay.style.display = 'flex';
+    
+    // Simulate AI response based on content
+    setTimeout(() => {
+      let response;
+      const lowerMessage = message.toLowerCase();
+      
+      // Determine response type based on keywords
+      if (lowerMessage.includes('hack') || lowerMessage.includes('security') || 
+          lowerMessage.includes('vulnerability') || lowerMessage.includes('exploit') ||
+          lowerMessage.includes('penetration') || lowerMessage.includes('attack')) {
+        response = hackingResponses[Math.floor(Math.random() * hackingResponses.length)];
+      } else {
+        response = programmingResponses[Math.floor(Math.random() * programmingResponses.length)];
+      }
+      
+      // Add code examples for programming responses
+      if (!lowerMessage.includes('hack') && !lowerMessage.includes('security')) {
+        response += getCodeExample(message);
+      }
+      
+      addAIMessage('bot', response);
+      
+      // Hide loading
+      loadingOverlay.style.display = 'none';
+    }, 2000);
+  }
+  
+  // Enter key to send message
+  messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  
+  // Send button click
+  sendBtn.addEventListener('click', sendMessage);
+  
+  // New chat button
+  newChatBtn.addEventListener('click', () => {
+    const chatMessages = document.getElementById('aiChatMessages');
+    chatMessages.innerHTML = `
+      <div class="ai-welcome-message">
+        <div class="ai-bot-avatar">
+          <i class="fas fa-terminal"></i>
+        </div>
+        <div class="ai-message-content">
+          <h3 style="margin-bottom: 0.5rem;">🔄 New Programming Session Started</h3>
+          <p style="margin: 0; line-height: 1.6;">
+            <strong>Ready for:</strong><br>
+            • Code review & optimization<br>
+            • Security analysis & pentesting<br>
+            • Bug fixing & debugging<br>
+            • Algorithm design & optimization<br>
+            • System architecture & design patterns<br><br>
+            <em>What coding challenge can I help you solve?</em>
+          </p>
+        </div>
+      </div>
+    `;
+  });
+  
+  // Theme toggle for AI section
+  themeToggle.addEventListener('click', () => {
+    const icon = themeToggle.querySelector('i');
+    if (icon.classList.contains('fa-moon')) {
+      icon.className = 'fas fa-sun';
+      showNotification('<i class="fas fa-sun"></i> DevAI theme changed');
+    } else {
+      icon.className = 'fas fa-moon';
+      showNotification('<i class="fas fa-moon"></i> DevAI theme changed');
+    }
+  });
+}
+
+function getCodeExample(message) {
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('html') || lowerMessage.includes('website')) {
+    return `
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Web Application</title>
+    <style>
+        /* Security-focused CSS with input validation */
+        .secure-input {
+            border: 2px solid #4ecdc4;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            margin: 8px 0;
+        }
+        .secure-input:invalid {
+            border-color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <form onsubmit="return validateForm()">
+        <input type="text" class="secure-input" pattern="[A-Za-z0-9]+" required>
+        <button type="submit">Secure Submit</button>
+    </form>
+    
+    <script>
+        function validateForm() {
+            // Client-side validation
+            const input = document.querySelector('.secure-input');
+            if (!input.checkValidity()) {
+                alert('Invalid input detected');
+                return false;
+            }
+            // Always validate on server-side too!
+            return true;
+        }
+    </script>
+</body>
+</html>
+\`\`\``;
+  }
+  
+  if (lowerMessage.includes('python') || lowerMessage.includes('script')) {
+    return `
+
+\`\`\`python
+import hashlib
+import re
+
+def secure_password_hash(password):
+    """Secure password hashing with salt"""
+    salt = "secure_salt_123"
+    return hashlib.sha256((password + salt).encode()).hexdigest()
+
+def validate_input(user_input):
+    """Input validation to prevent injection attacks"""
+    if not re.match("^[a-zA-Z0-9_]+$", user_input):
+        raise ValueError("Invalid input characters detected")
+    return user_input
+
+def sql_injection_prevention(query, params):
+    """Parameterized query example"""
+    # Always use parameterized queries!
+    # cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+    return f"Executing safe query: {query} with params: {params}"
+
+# Example usage
+try:
+    user_input = validate_input("safe_input_123")
+    hashed_pw = secure_password_hash("my_password")
+    print(f"Secure hash: {hashed_pw}")
+except ValueError as e:
+    print(f"Security error: {e}")
+\`\`\``;
+  }
+  
+  if (lowerMessage.includes('javascript') || lowerMessage.includes('js')) {
+    return `
+
+\`\`\`javascript
+// Secure JavaScript practices
+class SecurityHelper {
+    static sanitizeInput(input) {
+        // Remove potential XSS vectors
+        return input.replace(/[<>]/g, '');
+    }
+    
+    static validateEmail(email) {
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    static preventXSS(html) {
+        const div = document.createElement('div');
+        div.textContent = html;
+        return div.innerHTML;
+    }
+}
+
+// Secure API call with error handling
+async function secureAPICall(url, data) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCSRFToken()
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) throw new Error('API request failed');
+        return await response.json();
+    } catch (error) {
+        console.error('Security error:', error);
+        throw error;
+    }
+}
+
+// Usage example
+const userInput = SecurityHelper.sanitizeInput(userProvidedInput);
+const safeHTML = SecurityHelper.preventXSS('<script>alert("xss")</script>');
+\`\`\``;
+  }
+  
+  if (lowerMessage.includes('php')) {
+    return `
+
+\`\`\`php
+<?php
+// Secure PHP practices
+class Security {
+    public static function sanitizeInput($input) {
+        $input = trim($input);
+        $input = stripslashes($input);
+        $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+        return $input;
+    }
+    
+    public static function validateEmail($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+    
+    public static function preventSQLInjection($pdo, $query, $params) {
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        return $stmt;
+    }
+}
+
+// Secure file upload
+function secureFileUpload($file) {
+    $allowed_types = ['image/jpeg', 'image/png', 'application/pdf'];
+    $max_size = 5 * 1024 * 1024; // 5MB
+    
+    if (!in_array($file['type'], $allowed_types)) {
+        throw new Exception('Invalid file type');
+    }
+    
+    if ($file['size'] > $max_size) {
+        throw new Exception('File too large');
+    }
+    
+    // Generate secure filename
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = uniqid() . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+    
+    return move_uploaded_file($file['tmp_name'], 'uploads/' . $filename);
+}
+
+// Usage
+$clean_input = Security::sanitizeInput($_POST['user_input']);
+?>
+\`\`\``;
+  }
+  
+  return "\n\n*Need specific code examples? Ask about HTML, CSS, JavaScript, Python, PHP, or security implementations!*";
+}
+
+function addAIMessage(sender, text, file = null) {
+  const chatMessages = document.getElementById('aiChatMessages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `ai-message ${sender}`;
+
+  const avatarDiv = document.createElement('div');
+  avatarDiv.className = 'ai-message-avatar';
+  avatarDiv.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-terminal"></i>';
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'ai-message-content';
+
+  if (file && sender === 'user') {
+    const fileDiv = document.createElement('div');
+    fileDiv.className = 'file-attachment';
+    fileDiv.innerHTML = `<i class="fas fa-file-code"></i> <span>${file.name}</span>`;
     contentDiv.appendChild(fileDiv);
   }
 
